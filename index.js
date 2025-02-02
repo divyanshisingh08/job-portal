@@ -1,6 +1,10 @@
 const express=require("express")
 const cookieParser =require("cookie-parser")
 const cors=require("cors")
+const dotenv= require("dotenv")
+const  connectDB = require("./utils/db")
+
+dotenv.config({})
 
 const app=express();
 
@@ -19,9 +23,18 @@ const corsOptions={
 }
 app.use(cors(corsOptions))
 
-const PORT=3000;
+const PORT=process.env.PORT || 3000;
 
-app.listen(3000, ()=>{
-    console.log(`Server is listening on PORT ${PORT}`)
-})
 
+
+connectDB()
+  .then(() => {
+    console.log("Database Connection Established");
+    app.listen(PORT, () => {
+       console.log(`Server is listening on PORT ${PORT}`)
+
+    });
+  })
+  .catch((err) => {
+    console.error("Database Connection Failed" + err.message);
+  });
