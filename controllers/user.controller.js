@@ -68,9 +68,6 @@ const login=async(req,res)=>{
     };
 
 
-    user={
-        ._id:user._id,
-    }
 
 const token =await jwt.sign(tokenData,process.env.SECRET_KEY,{expiresIn:'1d'});
 return res.status(200).cookie("token",token,{maxAge:1*24*60*60*1000,httpsOnly:true,sameSite:'strict'}).json({
