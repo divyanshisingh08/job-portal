@@ -1,6 +1,8 @@
 const express=require("express");
 const User = require("../models/user.model");
-const bcrypt=require("bcryptjs")
+const bcrypt=require("bcryptjs");
+const jwt=require("jsonwebtoken");
+const cookie=require("cookie-parse")
 
 
 
@@ -42,7 +44,7 @@ const login=async(req,res)=>{
     try {
         const {email,password,role}=req.body;
 
-    const user=await User.findOne({email})
+    let user=await User.findOne({email})
 
     if(!user){
         throw new Error("User Does not exist");
@@ -65,7 +67,18 @@ const login=async(req,res)=>{
         userId:user._id
     };
 
-const token =await jwt.sign()
+
+    user={
+        ._id:user._id,
+    }
+
+const token =await jwt.sign(tokenData,process.env.SECRET_KEY,{expiresIn:'1d'});
+return res.status(200).cookie("token",token,{maxAge:1*24*60*60*1000,httpsOnly:true,sameSite:'strict'}).json({
+    message:`Welcome ${user.fullName}`,
+    successs:true
+})
+
+
 
     
     } catch (error) {
