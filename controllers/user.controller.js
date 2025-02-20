@@ -3,6 +3,8 @@ const User = require("../models/user.model");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
 const cookie=require("cookie-parser")
+const _ = require("lodash");
+
 
 
 
@@ -23,7 +25,7 @@ const register=async(req,res)=>{
 
        const hashedPassword= await bcrypt.hash(password,10);
 
-       await User.save({
+       await User.create({
         fullName,
         email,
         password:hashedPassword,
@@ -32,7 +34,8 @@ const register=async(req,res)=>{
        })
        
        return res.status(201).json({
-        message : " Account Created Successfully"
+        message : "Account Created Successfully",
+        success:true
        })
     } catch (error) {
         res.status(400).send("Something went wrong "+ error.message)
@@ -108,39 +111,50 @@ const logout=async(req,res)=>{
 
 const updateProfile=async(req,res)=>{
         try {
-        
-               const userId=req.id;  //middleware authentication
-
-               const user=await User.findById(userId);
-
-               if(!user){
-                throw new Error("User not Found")
-               }
-
-
-               const {fullName,email,phoneNumber,bio,skills}=req.body;
-
-               const file=req.file;
-
-               if (!fullName || !phoneNumber || !email || !bio || !skills){
-                   throw new Error("Please fill all the details")
-                  }
+             const userId=req.id;  //middleware authentication
                
-                  const skillsArray=skills.split(",");
+             const { fullName, phoneNumber, email, profile } = req.body;
+
+            let updateData = {};
+
+            // Update top-level fields if provided
+            if (fullName) updateData.fullName = fullName;
+            if (phoneNumber) updateData.phoneNumber = phoneNumber;
+            if (email) updateData.email = email;
+                
+               // Ensure profile updates are applied correctly
+               if (profile) {
+                 for (const key in profile) {
+                   updateData[`profile.${key}`] = profile[key];
+                 }
+               }
+           
+               // Update user in DB
+               const user = await User.findByIdAndUpdate(
+                 userId,
+                 { $set: updateData },
+                 { new: true, runValidators: true }
+               );
+          
+              if (!user) {
+                throw new Error("User not Found");
+              }
+          
+               
+                //   const skillsArray=skills.split(",");
 //Loop through all the fields and update each with the coming data
+            await user.save();
 
-Object.keys(req.body).forEach((key)=>(undefinedser[key]=req.body[key]))
+            console.log(user)
 
-await user.save();
-
-user={
-    _id:user._id,
-    fullName : user.fullName,
-    email:user.email,
-    phoneNumber:user.phoneNumber,
-    role:user.role,
-    profile:user.profile
-}
+// user={
+//     _id:user._id,
+//     fullName : user.fullName,
+//     email:user.email,
+//     phoneNumber:user.phoneNumber,
+//     role:user.role,
+//     profile:user.profile
+// }
 
 return res.status(200).json({
     message: "Profile Updated Successfully",
@@ -164,4 +178,4 @@ return res.status(200).json({
 }
 
 
-module.exports={login,register,updateProfile}
+module.exports={login,register,updateProfile,logout}
