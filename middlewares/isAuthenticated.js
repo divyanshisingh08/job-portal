@@ -1,30 +1,26 @@
-const jwt=require("jsonwebtoken")
+const User = require("../models/user.model");
+const jwt = require("jsonwebtoken");
 
-const isAuthenticated=async(req,res,next)=>{
+const isAuthenticated = async (req, res, next) => {
     try {
-        const token =req.cookies.token;
-        console.log(token)
-        if(!token){
-            throw new Error("User Not Authenticated")
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ message: "User Not Authenticated" });
         }
 
+        // Validate token and fetch user
+        const decodedMessage = await jwt.verify(token, process.env.SECRET_KEY);
+        const user = await User.findById(decodedMessage.userId);
 
-         // Validate the token
-    const decodedMessage= await jwt.verify(token,process.env.SECRET_KEY);
-    console.log("HHHHHHHHHHHHHHHHHH", decodedMessage)
+        if (!user) {
+            return res.status(401).json({ message: "Invalid User" });
+        }
 
-    // Find the username
-   req.id= decodedMessage.userId;
-
-   console.log(req.id)
-     next()
-
-
+        req.user = user; // Attach user to request
+        next();
     } catch (error) {
-        res.status(400).send("Something went wrong " + error);
-        
+        res.status(400).json({ message: "Something went wrong", error: error.message });
     }
-}
+};
 
-
-module.exports= isAuthenticated
+module.exports = isAuthenticated;

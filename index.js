@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./utils/db");
 const userRouter = require("./routes/user.route");
+const companyRouter=require("./routes/company.route")
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use(cors(corsOptions));
 const PORT = process.env.PORT || 3000;
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/company", companyRouter);
 
 connectDB()
   .then(() => {

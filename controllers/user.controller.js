@@ -3,7 +3,7 @@ const User = require("../models/user.model");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
 const cookie=require("cookie-parser")
-const _ = require("lodash");
+
 
 
 
@@ -17,6 +17,8 @@ const register=async(req,res)=>{
        }
 
        const user= await User.findOne({email});
+
+
 
        if(user){
         throw new Error("User already exists")
@@ -108,74 +110,41 @@ const logout=async(req,res)=>{
     }
 }
 
+const updateProfile = async (req, res) => {
+    try {
+        const user = req.user; // Get authenticated user
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+       
+        const { fullName, phoneNumber, email, profile } = req.body;
+        let updateData = {};
 
-const updateProfile=async(req,res)=>{
-        try {
-             const userId=req.id;  //middleware authentication
-               
-             const { fullName, phoneNumber, email, profile } = req.body;
-
-            let updateData = {};
-
-            // Update top-level fields if provided
-            if (fullName) updateData.fullName = fullName;
-            if (phoneNumber) updateData.phoneNumber = phoneNumber;
-            if (email) updateData.email = email;
-                
-               // Ensure profile updates are applied correctly
-               if (profile) {
-                 for (const key in profile) {
-                   updateData[`profile.${key}`] = profile[key];
-                 }
-               }
-           
-               // Update user in DB
-               const user = await User.findByIdAndUpdate(
-                 userId,
-                 { $set: updateData },
-                 { new: true, runValidators: true }
-               );
-          
-              if (!user) {
-                throw new Error("User not Found");
-              }
-          
-               
-                //   const skillsArray=skills.split(",");
-//Loop through all the fields and update each with the coming data
-            await user.save();
-
-            console.log(user)
-
-// user={
-//     _id:user._id,
-//     fullName : user.fullName,
-//     email:user.email,
-//     phoneNumber:user.phoneNumber,
-//     role:user.role,
-//     profile:user.profile
-// }
-
-return res.status(200).json({
-    message: "Profile Updated Successfully",
-    user,
-    success:true,
-})
-
-                
-        } catch (error) {
-            res.status(400).send("Something went wrong "+ error.message)
-
+        if (fullName) updateData.fullName = fullName;
+        if (phoneNumber) updateData.phoneNumber = phoneNumber;
+        if (email) updateData.email = email;
+        if (profile) {
+            for (const key in profile) {
+                updateData[`profile.${key}`] = profile[key];
+            }
         }
 
-    
-    
 
-    
 
-    
+         user.set(updateData);
+        await user.save();
 
-}
+        return res.status(200).json({
+            message: "Profile Updated Successfully",
+            user,
+            success: true,
+        });
+
+    } catch (error) {
+        res.status(400).json({ message: "Something went wrong", error: error.message });
+    }
+};
+
 
 
 module.exports={login,register,updateProfile,logout}
