@@ -19,7 +19,7 @@ const registerCompany = async (req, res) => {
             location,
             logo,
             website,
-            userId:req.id
+            userId: req.user._id 
         });
 
         await company.save();  
@@ -39,7 +39,7 @@ const getCompany=async(req,res)=>{
 
 
     
-    const userId=req.id;
+    const userId = req.user._id;
     console.log("This is user",userId)
 
 

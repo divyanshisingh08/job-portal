@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./utils/db");
 const userRouter = require("./routes/user.route");
 const companyRouter=require("./routes/company.route")
+const jobRouter=require("./routes/job.route")
 
 dotenv.config();
 
@@ -29,10 +30,10 @@ const PORT = process.env.PORT || 3000;
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/company", companyRouter);
+app.use("/api/v1/job", jobRouter);
 
 connectDB()
   .then(() => {
-    console.log("Database Connection Established");
     app.listen(PORT, () => {
       console.log(`Server is listening on PORT ${PORT}`);
     });

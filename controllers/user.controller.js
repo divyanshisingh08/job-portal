@@ -51,8 +51,9 @@ const register=async(req,res)=>{
 const login=async(req,res)=>{
     try {
         const {email,password,role}=req.body;
+        
 
-    let user=await User.findOne({email})
+    let user=await User.findOne({ email })
 
     if(!user){
         throw new Error("User Does not exist");
@@ -92,7 +93,11 @@ return res.status(200).cookie("token",token,{maxAge:1*24*60*60*1000,httpsOnly:tr
 
     
     } catch (error) {
-        res.status(400).send("Something went wrong" + error.message)
+          
+        res.status(400).json({
+            message: error.message || "Something went wrong",
+            success: false
+        });
         
     }
 }
