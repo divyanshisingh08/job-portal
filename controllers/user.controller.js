@@ -50,9 +50,9 @@ const register=async(req,res)=>{
 
 const login=async(req,res)=>{
     try {
-        const {email,password,role}=req.body;
-        
+        const {email,password,role}=req.body; 
 
+        console.log(email)
     let user=await User.findOne({ email })
 
     if(!user){
